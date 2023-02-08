@@ -6,6 +6,7 @@ import std.stdio;
 import std.format;
 import std.process;
 import std.algorithm;
+import std.digest.md;
 import util;
 
 static string[] ignoreExt = [
@@ -31,8 +32,20 @@ void BuildSystem_Build() {
 				continue;
 			}
 
-			string inFile = entry.name;
-			string outFile = getcwd() ~ "/.ypm/" ~ baseName(entry.name) ~ ".o";
+			string    inFile         = entry.name;
+			string    inFileContents = readText(inFile);
+			ubyte[16] inFileHash     = inFileContents.md5Of();
+			string    inFileHashPath = getcwd() ~ "/.ypm/" ~ baseName(inFile) ~ ".hash";
+			string    outFile        = getcwd() ~ "/.ypm/" ~ baseName(entry.name) ~ ".o";
+
+			if (exists(inFileHashPath)) {
+				if (std.file.read(inFileHashPath) == inFileHash) {
+					continue;
+				}
+			}
+
+			std.file.write(inFileHashPath, inFileHash);
+			
 			writefln("Compiling %s", baseName(inFile));
 
 			auto status =
