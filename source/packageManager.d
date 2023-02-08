@@ -67,6 +67,7 @@ void PackageManager_Init(bool presetUsed, string preset) {
 	//}
 
 	config["dependencies"] = JSONValue(cast(string[]) []);
+	config["sourceFolder"] = JSONValue("src");
 
 	mkdir("source");
 	mkdir(".ypm");

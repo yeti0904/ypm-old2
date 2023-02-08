@@ -23,6 +23,8 @@ void BuildSystem_Build() {
 
 	auto config = readText("ypm.json").parseJSON();
 
+	string srcFolder = config["sourceFolder"].str;
+
 	writefln("Building project %s", config["name"].str);
 
 	string command = config["run"].str;
@@ -30,7 +32,7 @@ void BuildSystem_Build() {
 	if (command.canFind("%S")) {
 		// variable source file, we must iterate through source files
 		// this is probably a compiled language
-		foreach (ref entry ; dirEntries(getcwd() ~ "/source", SpanMode.shallow)) {
+		foreach (ref entry ; dirEntries(getcwd() ~ "/" ~ srcFolder, SpanMode.shallow)) {
 			if (ignoreExt.canFind(entry.name.extension())) {
 				continue;
 			}
