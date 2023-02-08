@@ -79,8 +79,6 @@ void PackageManager_Update() {
 
 	auto config = readText("ypm.json").parseJSON();
 
-	executeShell("git submodule update --remote");
-
 	foreach (ref val ; config["dependencies"].arrayNoRef()) {
 		if (!exists(getcwd() ~ "/.ypm/" ~ baseName(val.str))) {
 			writefln("Installing %s", baseName(val.str));
@@ -98,4 +96,8 @@ void PackageManager_Update() {
 			}
 		}
 	}
+
+	executeShell("git submodule update --remote --init --recursive");
+
+	writeln("Finished updating");
 }

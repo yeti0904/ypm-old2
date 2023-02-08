@@ -39,6 +39,10 @@ void main(string[] args) {
 			BuildSystem_Build();
 			break;
 		}
+		case "clear": {
+			BuildSystem_ClearCache();
+			break;
+		}
 		default: {
 			stderr.writefln("Unknown operation %s", args[1]);
 			return;

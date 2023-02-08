@@ -22,6 +22,8 @@ void BuildSystem_Build() {
 
 	auto config = readText("ypm.json").parseJSON();
 
+	writefln("Building project %s", config["name"].str);
+
 	string command = config["run"].str;
 
 	if (command.canFind("%S")) {
@@ -58,19 +60,47 @@ void BuildSystem_Build() {
 			}
 		}
 
-		writeln("Linking..");
 
-		auto status = executeShell(format("cc ./.ypm/*.o -o %s", config["name"].str));
+		string    finalFileHashPath = getcwd() ~ "/.ypm/final.hash";
+		ubyte[16] finalFileHash;
 
-		if (status.status != 0) {
-			stderr.writeln(status.output);
-			stderr.writefln("Failed, exiting now");
-			return;
+		if (exists(finalFileHashPath)) {
+			finalFileHash = std.file.read(config["name"].str).md5Of();
 		}
+
+		if (
+			!exists(config["name"].str) ||
+			!exists(finalFileHashPath) ||
+			(std.file.read(finalFileHashPath) == finalFileHash)
+		) {
+			writeln("Linking..");
+			auto status = executeShell(format("cc ./.ypm/*.o -o %s", config["name"].str));
+
+			std.file.write(finalFileHashPath, finalFileHash);
+
+			if (status.status != 0) {
+				stderr.writeln(status.output);
+				stderr.writefln("Failed, exiting now");
+				return;
+			}
+		}
+
 
 		writeln("Done");
 	}
 	else {
 		executeShell(command);
 	}
+}
+
+void BuildSystem_ClearCache() {
+	auto status = executeShell("rm ./.ypm/*.hash ./.ypm/*.o");
+
+	if (status.status != 0) {
+		stderr.writeln("Failed to clear cache:");
+		stderr.writeln(status.output);
+		return;
+	}
+
+	writeln("Cleared cache");
 }
