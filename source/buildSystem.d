@@ -74,7 +74,8 @@ void BuildSystem_Build() {
 			(std.file.read(finalFileHashPath) == finalFileHash)
 		) {
 			writeln("Linking..");
-			auto status = executeShell(format("cc ./.ypm/*.o -o %s", config["name"].str));
+			//auto status = executeShell(format("cc ./.ypm/*.o -o %s", config["name"].str));
+			auto status = executeShell(config["final"].str.replace("%B", config["name"].str));
 
 			std.file.write(finalFileHashPath, finalFileHash);
 
