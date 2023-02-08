@@ -1,7 +1,9 @@
+import std.file;
 import std.stdio;
 import std.string;
 import packageManager;
 import buildSystem;
+import util;
 
 const string appHelp = "
 YPM Package manager
@@ -10,9 +12,12 @@ Options:
     add    - add library
     update - update dependencies
     build  - build project
+    clear  - clear final/source cache
 ";
 
 void main(string[] args) {
+	CheckPath();
+
 	if (args.length == 1) {
 		writeln(appHelp.strip());
 		return;
@@ -20,7 +25,7 @@ void main(string[] args) {
 
 	switch (args[1]) {
 		case "init": {
-			PackageManager_Init();
+			PackageManager_Init(false, "");
 			return;
 		}
 		case "add": {
@@ -41,6 +46,13 @@ void main(string[] args) {
 		}
 		case "clear": {
 			BuildSystem_ClearCache();
+			break;
+		}
+		case "setup": {
+			if (!exists(".ypm")) {
+				mkdir(".ypm");
+			}
+			PackageManager_Update();
 			break;
 		}
 		default: {

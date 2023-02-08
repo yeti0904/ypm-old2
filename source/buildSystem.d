@@ -7,6 +7,7 @@ import std.format;
 import std.process;
 import std.algorithm;
 import std.digest.md;
+import core.stdc.stdlib;
 import util;
 
 static string[] ignoreExt = [
@@ -56,10 +57,9 @@ void BuildSystem_Build() {
 			if (status.status != 0) {
 				stderr.writeln(status.output);
 				stderr.writefln("Failed, exiting now");
-				return;
+				exit(1);
 			}
 		}
-
 
 		string    finalFileHashPath = getcwd() ~ "/.ypm/final.hash";
 		ubyte[16] finalFileHash;

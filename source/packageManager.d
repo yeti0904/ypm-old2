@@ -5,11 +5,24 @@ import std.stdio;
 import std.format;
 import std.string;
 import std.process;
+import core.stdc.stdlib;
 import util;
+/*
+string[string] finalPresets = [
+	"C_program":   "cc .ypm/*.o -o %B",
+	"C_library":   "cc .ypm/*.o -o %B -shared -fPIC",
+	"C++_program": "c++ .ypm/*.o -o %B",
+	"C++_library": "c++ .ypm/*.o -o %B -shared -fPIC"
+];
 
-void PackageManager_Init() {
-	CheckIfFolderIsProject();
-
+string[string] runPresets = [
+	"C_program":   "cc %S -c -o %B -I.ypm",
+	"C_library":   "cc %S -c -o %B -I.ypm",
+	"C++_program": "c++ %S -c -o %B -I.ypm",
+	"C++_library": "c++ %s -c -o %B -I.ypm"
+];
+*/
+void PackageManager_Init(bool presetUsed, string preset) {
 	JSONValue config;
 	string    input;
 
@@ -33,15 +46,25 @@ void PackageManager_Init() {
 	if (input != "") {
 		config["author"] = JSONValue(input);
 	}
-
-	config["run"] = "cc %S -c -o %B -I.ypm";
-	writeln("Compiler/Interpreter configuration");
-	writeln("Type %S for source file and %B for out file, both do not need to be present");
-	writef("Run command [%s]: ", config["run"].str);
-	input = readln().strip();
-	if (input != "") {
-		config["run"] = JSONValue(input);
+/*
+	if (presetUsed) {
+		config["run"]   = runPresets[preset];
+		config["final"] = finalPresets[preset];
 	}
+	else {*/
+		config["run"] = "";
+		writeln("Compiler/Interpreter configuration");
+		writeln("Type %S for source file and %B for out file, both do not need to be present");
+		writeln("This command will be run for every source file");
+		writef("Run command: ");
+		input = readln().strip();
+		config["run"] = JSONValue(input);
+			
+		writeln("Same as before, but this command will run after the run command has been executed for all source files");
+		writef("Final command: ");
+		input = readln().strip();
+		config["final"] = JSONValue(input);
+	//}
 
 	config["dependencies"] = JSONValue(cast(string[]) []);
 
@@ -83,16 +106,28 @@ void PackageManager_Update() {
 		if (!exists(getcwd() ~ "/.ypm/" ~ baseName(val.str))) {
 			writefln("Installing %s", baseName(val.str));
 
-			string command = format(
-				"git submodule add -f %s %s",
-				val.str, getcwd() ~ "/.ypm/" ~ baseName(val.str)
-			);
-			
-			auto status = executeShell(command);
+			string path    = getcwd() ~ "/.ypm/" ~ baseName(val.str);
+			string command = format("git submodule add -f %s %s", val.str, path);
+			auto   status  = executeShell(command);
 
 			if (status.status != 0) {
 				stderr.writefln("Something has gone wrong:");
 				stderr.writeln(status.output);
+				exit(1);
+			}
+
+			// check if dependency is a YPM project
+			if (!exists(path ~ "/ypm.json")) {
+				stderr.writefln("Warning: %s is not a YPM project", baseName(path));
+				continue;
+			}
+
+			status = executeShell(format("cd %s && ypm setup && ypm build"));
+
+			if (status.status != 0) {
+				stderr.writefln("Failed to set up dependency %s:", baseName(path));
+				stderr.writeln(status.output);
+				exit(1);
 			}
 		}
 	}
