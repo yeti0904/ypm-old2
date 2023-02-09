@@ -17,7 +17,7 @@ void InitPresets() {
 		"C_library":   "cc .ypm/*.o -o %B -shared -fPIC",
 		"C++_program": "c++ .ypm/*.o -o %B",
 		"C++_library": "c++ .ypm/*.o -o %B -shared -fPIC",
-		"header_only": ""
+		"header_only": " "
 	];
 	
 	runPresets = [
@@ -25,7 +25,7 @@ void InitPresets() {
 		"C_library":   "cc %S -c -o %B -I.ypm",
 		"C++_program": "c++ %S -c -o %B -I.ypm",
 		"C++_library": "c++ %s -c -o %B -I.ypm",
-		"header_only": ""
+		"header_only": " "
 	];
 }
 
