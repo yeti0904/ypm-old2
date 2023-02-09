@@ -32,7 +32,14 @@ void BuildSystem_Build() {
 	if (command.canFind("%S")) {
 		// variable source file, we must iterate through source files
 		// this is probably a compiled language
-		foreach (ref entry ; dirEntries(getcwd() ~ "/" ~ srcFolder, SpanMode.shallow)) {
+		string folder = getcwd() ~ "/" ~ srcFolder;
+
+		if (!exists(folder)) {
+			stderr.writefln("Error: No directory %s exists", folder);
+			exit(1);
+		}
+		
+		foreach (ref entry ; dirEntries(folder, SpanMode.shallow)) {
 			if (ignoreExt.canFind(entry.name.extension())) {
 				continue;
 			}

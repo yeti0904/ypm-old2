@@ -7,21 +7,42 @@ import std.string;
 import std.process;
 import core.stdc.stdlib;
 import util;
-/*
-string[string] finalPresets = [
-	"C_program":   "cc .ypm/*.o -o %B",
-	"C_library":   "cc .ypm/*.o -o %B -shared -fPIC",
-	"C++_program": "c++ .ypm/*.o -o %B",
-	"C++_library": "c++ .ypm/*.o -o %B -shared -fPIC"
-];
 
-string[string] runPresets = [
-	"C_program":   "cc %S -c -o %B -I.ypm",
-	"C_library":   "cc %S -c -o %B -I.ypm",
-	"C++_program": "c++ %S -c -o %B -I.ypm",
-	"C++_library": "c++ %s -c -o %B -I.ypm"
-];
-*/
+static string[string] finalPresets;
+static string[string] runPresets;
+
+void InitPresets() {
+	finalPresets = [
+		"C_program":   "cc .ypm/*.o -o %B",
+		"C_library":   "cc .ypm/*.o -o %B -shared -fPIC",
+		"C++_program": "c++ .ypm/*.o -o %B",
+		"C++_library": "c++ .ypm/*.o -o %B -shared -fPIC"
+	];
+	
+	runPresets = [
+		"C_program":   "cc %S -c -o %B -I.ypm",
+		"C_library":   "cc %S -c -o %B -I.ypm",
+		"C++_program": "c++ %S -c -o %B -I.ypm",
+		"C++_library": "c++ %s -c -o %B -I.ypm"
+	];
+}
+
+bool PresetExists(string name) {
+	return ((name in finalPresets) !is null) && ((name in runPresets) !is null);
+}
+
+string[] GetPresets() {
+	string[] ret;
+
+	foreach (ref key, value ; finalPresets) {
+		if (PresetExists(key)) {
+			ret ~= key;
+		}
+	}
+
+	return ret;
+}
+
 void PackageManager_Init(bool presetUsed, string preset) {
 	JSONValue config;
 	string    input;
@@ -46,12 +67,12 @@ void PackageManager_Init(bool presetUsed, string preset) {
 	if (input != "") {
 		config["author"] = JSONValue(input);
 	}
-/*
+
 	if (presetUsed) {
 		config["run"]   = runPresets[preset];
 		config["final"] = finalPresets[preset];
 	}
-	else {*/
+	else {
 		config["run"] = "";
 		writeln("Compiler/Interpreter configuration");
 		writeln("Type %S for source file and %B for out file, both do not need to be present");
@@ -64,10 +85,10 @@ void PackageManager_Init(bool presetUsed, string preset) {
 		writef("Final command: ");
 		input = readln().strip();
 		config["final"] = JSONValue(input);
-	//}
+	}
 
 	config["dependencies"] = JSONValue(cast(string[]) []);
-	config["sourceFolder"] = JSONValue("src");
+	config["sourceFolder"] = JSONValue("source");
 
 	mkdir("source");
 	mkdir(".ypm");
@@ -118,12 +139,13 @@ void PackageManager_Update() {
 			}
 
 			// check if dependency is a YPM project
-			if (!exists(path ~ "/ypm.json")) {
-				stderr.writefln("Warning: %s is not a YPM project", baseName(path));
+			if (exists(path ~ "/ypm.json")) {
+				status = executeShell(format("cd %s && ypm setup && ypm build", path));
+			}
+			else {
+				stderr.writefln("Warning: %s is not a YPM project, not setting up", baseName(path));
 				continue;
 			}
-
-			status = executeShell(format("cd %s && ypm setup && ypm build"));
 
 			if (status.status != 0) {
 				stderr.writefln("Failed to set up dependency %s:", baseName(path));
