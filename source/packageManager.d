@@ -94,7 +94,11 @@ void PackageManager_Init(bool presetUsed, string preset) {
 	mkdir("source");
 	mkdir(".ypm");
 
-	std.file.write(
+	if (!exists(".gitignore")) {
+		std.file.write(".gitignore", "");
+	}
+
+	append(
 		".gitignore", format(
 			"%s\n.ypm", config["name"].str
 		)
