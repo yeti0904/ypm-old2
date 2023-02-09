@@ -93,8 +93,12 @@ void PackageManager_Init(bool presetUsed, string preset) {
 	config["sourceFolder"] = JSONValue("source");
 	config["finalFile"]    = config["name"];
 
-	mkdir("source");
-	mkdir(".ypm");
+	if (!exists("source")) {
+		mkdir("source");
+	}
+	if (!exists(".ypm")) {
+		mkdir(".ypm");
+	}
 
 	if (!exists(".gitignore")) {
 		std.file.write(".gitignore", "");
