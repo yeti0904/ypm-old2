@@ -21,7 +21,6 @@ Options:
 
 void main(string[] args) {
 	CheckPath();
-
 	InitPresets();
 
 	if (args.length == 1) {

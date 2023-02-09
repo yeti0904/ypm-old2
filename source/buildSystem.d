@@ -74,7 +74,7 @@ void BuildSystem_Build() {
 		ubyte[16] finalFileHash;
 
 		if (exists(finalFileHashPath)) {
-			finalFileHash = std.file.read(config["name"].str).md5Of();
+			finalFileHash = std.file.read(config["finalFile"].str).md5Of();
 		}
 
 		if (
