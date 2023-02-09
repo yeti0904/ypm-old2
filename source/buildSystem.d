@@ -78,13 +78,14 @@ void BuildSystem_Build() {
 		}
 
 		if (
-			!exists(config["name"].str) ||
+			!exists(config["finalFile"].str) ||
 			!exists(finalFileHashPath) ||
 			(std.file.read(finalFileHashPath) == finalFileHash)
 		) {
 			writeln("Linking..");
 			//auto status = executeShell(format("cc ./.ypm/*.o -o %s", config["name"].str));
-			auto status = executeShell(config["final"].str.replace("%B", config["name"].str));
+			auto status = executeShell(
+				config["final"].str.replace("%B", config["finalFile"].str));
 
 			std.file.write(finalFileHashPath, finalFileHash);
 
