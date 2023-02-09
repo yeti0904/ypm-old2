@@ -166,3 +166,16 @@ void PackageManager_Update() {
 
 	writeln("Finished updating");
 }
+
+void PackageManager_Install() {
+	CheckIfFolderIsProject();
+
+	auto config = readText("ypm.json").parseJSON();
+
+	if (!exists(config["finalFile"].str)) {
+		stderr.writefln("Final file (%s) doesn't exist", config["finalFile"].str);
+		exit(1);
+	}
+
+	copy(config["finalFile"].str, "/usr/bin/" ~ baseName(config["finalFile"].str));
+}

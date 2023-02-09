@@ -9,13 +9,14 @@ import util;
 const string appHelp = "
 YPM:  Package manager and build system
 Options:
-    init   - create project
-    add    - add library
-    update - update dependencies
-    build  - build project
-    clear  - clear final/source cache
-    setup  - create ypm private folder and install dependencies
-    preset - list project presets
+    init    - create project
+    add     - add library
+    update  - update dependencies
+    build   - build project
+    clear   - clear final/source cache
+    setup   - create ypm private folder and install dependencies
+    preset  - list project presets
+    install - copy final file to /usr/bin/
 ";
 
 void main(string[] args) {
@@ -77,6 +78,10 @@ void main(string[] args) {
 			foreach (ref preset ; GetPresets()) {
 				writeln(preset);
 			}
+			break;
+		}
+		case "install": {
+			PackageManager_Install();
 			break;
 		}
 		default: {
