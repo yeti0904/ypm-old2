@@ -48,50 +48,72 @@ string[] GetPresets() {
 void PackageManager_Init(bool presetUsed, string preset) {
 	JSONValue config;
 	string    input;
+	bool      updated;
 
-	config["name"] = JSONValue(baseName(getcwd()));
-	writef("Name [%s]: ", config["name"].str);
-	input = readln().strip();
-	if (input != "") {
-		config["name"] = JSONValue(input);
+	if (exists("ypm.json")) {
+		config  = readText("ypm.json").parseJSON();
+		updated = true;
 	}
 
-	config["license"] = "propietary";
-	writef("License [%s]: ", config["license"].str);
-	input = readln().strip();
-	if (input != "") {
-		config["license"] = JSONValue(input);
-	}
-
-	config["author"] = "mx_foobarbaz";
-	writef("Author [%s]: ", config["author"].str);
-	input = readln().strip();
-	if (input != "") {
-		config["author"] = JSONValue(input);
-	}
-
-	if (presetUsed) {
-		config["run"]   = runPresets[preset];
-		config["final"] = finalPresets[preset];
-	}
-	else {
-		config["run"] = "";
-		writeln("Compiler/Interpreter configuration");
-		writeln("Type %S for source file and %B for out file, both do not need to be present");
-		writeln("This command will be run for every source file");
-		writef("Run command: ");
+	if (!("name" in config)) {
+		config["name"] = JSONValue(baseName(getcwd()));
+		writef("Name [%s]: ", config["name"].str);
 		input = readln().strip();
-		config["run"] = JSONValue(input);
-			
-		writeln("Same as before, but this command will run after the run command has been executed for all source files");
-		writef("Final command: ");
-		input = readln().strip();
-		config["final"] = JSONValue(input);
+		if (input != "") {
+			config["name"] = JSONValue(input);
+		}
 	}
 
-	config["dependencies"] = JSONValue(cast(string[]) []);
-	config["sourceFolder"] = JSONValue("source");
-	config["finalFile"]    = config["name"];
+	if (!("license" in config)) {
+		config["license"] = "propietary";
+		writef("License [%s]: ", config["license"].str);
+		input = readln().strip();
+		if (input != "") {
+			config["license"] = JSONValue(input);
+		}
+	}
+
+	if (!("author" in config)) {
+		config["author"] = "mx_foobarbaz";
+		writef("Author [%s]: ", config["author"].str);
+		input = readln().strip();
+		if (input != "") {
+			config["author"] = JSONValue(input);
+		}
+	}
+	if (!("run" in config) || !("final" in config)) {
+		if (presetUsed) {
+			config["run"]   = runPresets[preset];
+			config["final"] = finalPresets[preset];
+		}
+		else {
+			config["run"] = "";
+			writeln("Compiler/Interpreter configuration");
+			writeln("Type %S for source file and %B for out file, both do not need to be present");
+			writeln("This command will be run for every source file");
+			writef("Run command: ");
+			input = readln().strip();
+			config["run"] = JSONValue(input);
+				
+			writeln("Same as before, but this command will run after the run command has been executed for all source files");
+			writef("Final command: ");
+			input = readln().strip();
+			config["final"] = JSONValue(input);
+		}
+	}
+
+	if (!("dependencies" in config)) {
+		config["dependencies"] = JSONValue(cast(string[]) []);
+	}
+	if (!("libs" in config)) {
+		config["libs"]         = JSONValue(cast(string[]) []);
+	}
+	if (!("sourceFolder" in config)) {
+		config["sourceFolder"] = JSONValue("source");
+	}
+	if (!("finalFile" in config)) {
+		config["finalFile"]    = config["name"];
+	}
 
 	if (!exists("source")) {
 		mkdir("source");
@@ -110,11 +132,16 @@ void PackageManager_Init(bool presetUsed, string preset) {
 		)
 	);
 	
-	std.file.write("ypm.json", config.toString());
+	std.file.write("ypm.json", config.toPrettyString());
 
 	executeShell("git init > /dev/null");
 
-	writefln("Created empty project at %s", getcwd());
+	if (updated) {
+		writefln("Updated project at %s", getcwd());
+	}
+	else {
+		writefln("Created empty project at %s", getcwd());
+	}
 }
 
 void PackageManager_Add(string url) {
@@ -181,5 +208,11 @@ void PackageManager_Install() {
 		exit(1);
 	}
 
-	copy(config["finalFile"].str, "/usr/bin/" ~ baseName(config["finalFile"].str));
+	try {
+		copy(config["finalFile"].str, "/usr/bin/" ~ baseName(config["finalFile"].str));
+	}
+	catch (FileException e) {
+		stderr.writefln("Failed to install: %s", e.msg);
+		exit(1);
+	}
 }

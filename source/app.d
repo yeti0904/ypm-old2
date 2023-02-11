@@ -7,7 +7,7 @@ import buildSystem;
 import util;
 
 const string appHelp = "
-YPM:  Package manager and build system
+YPM - Package manager and build system
 Options:
     init    - create project
     add     - add library
@@ -15,7 +15,7 @@ Options:
     build   - build project
     clear   - clear final/source cache
     setup   - create ypm private folder and install dependencies
-    preset  - list project presets
+    presets - list project presets
     install - copy final file to /usr/bin/
 ";
 
@@ -47,6 +47,7 @@ void main(string[] args) {
 			return;
 		}
 		case "add": {
+			UpdateConfig();
 			if (args.length < 3) {
 				stderr.writeln("Need 1 extra parameter for add (repo link");
 					exit(1);
@@ -55,14 +56,17 @@ void main(string[] args) {
 			break;
 		}
 		case "update": {
+			UpdateConfig();
 			PackageManager_Update();
 			break;
 		}
 		case "build": {
+			UpdateConfig();
 			BuildSystem_Build();
 			break;
 		}
 		case "clear": {
+			UpdateConfig();
 			BuildSystem_ClearCache();
 			break;
 		}
@@ -74,12 +78,14 @@ void main(string[] args) {
 			break;
 		}
 		case "presets": {
+			UpdateConfig();
 			foreach (ref preset ; GetPresets()) {
 				writeln(preset);
 			}
 			break;
 		}
 		case "install": {
+			UpdateConfig();
 			PackageManager_Install();
 			break;
 		}

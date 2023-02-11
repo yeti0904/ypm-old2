@@ -23,7 +23,12 @@ void BuildSystem_Build() {
 
 	auto config = readText("ypm.json").parseJSON();
 
-	string srcFolder = config["sourceFolder"].str;
+	string   srcFolder = config["sourceFolder"].str;
+	string[] libs;
+
+	foreach (ref val ; config["link"].arrayNoRef) {
+		libs ~= val.str;
+	}
 
 	writefln("Building project %s", config["name"].str);
 
@@ -82,10 +87,17 @@ void BuildSystem_Build() {
 			!exists(finalFileHashPath) ||
 			(std.file.read(finalFileHashPath) == finalFileHash)
 		) {
+
+			string finalCommand =
+				config["final"].str.replace("%B", config["finalFile"].str);
+
+			foreach (ref link ; libs) {
+				finalCommand ~= " -l" ~ link;
+			}
+		
 			writeln("Linking..");
 			//auto status = executeShell(format("cc ./.ypm/*.o -o %s", config["name"].str));
-			auto status = executeShell(
-				config["final"].str.replace("%B", config["finalFile"].str));
+			auto status = executeShell(finalCommand);
 
 			std.file.write(finalFileHashPath, finalFileHash);
 
