@@ -36,7 +36,7 @@ void UpdateConfig() {
 	];
 
 	foreach (ref key ; required) {
-		if (!(key in config)) {
+		if (!(key in config.objectNoRef)) {
 			writeln("Missing keys detected in ypm.json, running init");
 			PackageManager_Init(false, "");
 			return;

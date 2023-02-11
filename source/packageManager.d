@@ -46,7 +46,7 @@ string[] GetPresets() {
 }
 
 void PackageManager_Init(bool presetUsed, string preset) {
-	JSONValue config;
+	JSONValue config = "{}".parseJSON();
 	string    input;
 	bool      updated;
 
@@ -55,7 +55,7 @@ void PackageManager_Init(bool presetUsed, string preset) {
 		updated = true;
 	}
 
-	if (!("name" in config)) {
+	if (!("name" in config.objectNoRef)) {
 		config["name"] = JSONValue(baseName(getcwd()));
 		writef("Name [%s]: ", config["name"].str);
 		input = readln().strip();
@@ -64,7 +64,7 @@ void PackageManager_Init(bool presetUsed, string preset) {
 		}
 	}
 
-	if (!("license" in config)) {
+	if (!("license" in config.objectNoRef)) {
 		config["license"] = "propietary";
 		writef("License [%s]: ", config["license"].str);
 		input = readln().strip();
@@ -73,7 +73,7 @@ void PackageManager_Init(bool presetUsed, string preset) {
 		}
 	}
 
-	if (!("author" in config)) {
+	if (!("author" in config.objectNoRef)) {
 		config["author"] = "mx_foobarbaz";
 		writef("Author [%s]: ", config["author"].str);
 		input = readln().strip();
@@ -81,7 +81,7 @@ void PackageManager_Init(bool presetUsed, string preset) {
 			config["author"] = JSONValue(input);
 		}
 	}
-	if (!("run" in config) || !("final" in config)) {
+	if (!("run" in config.objectNoRef) || !("final" in config.objectNoRef)) {
 		if (presetUsed) {
 			config["run"]   = runPresets[preset];
 			config["final"] = finalPresets[preset];
@@ -102,16 +102,16 @@ void PackageManager_Init(bool presetUsed, string preset) {
 		}
 	}
 
-	if (!("dependencies" in config)) {
+	if (!("dependencies" in config.objectNoRef)) {
 		config["dependencies"] = JSONValue(cast(string[]) []);
 	}
-	if (!("libs" in config)) {
+	if (!("libs" in config.objectNoRef)) {
 		config["libs"]         = JSONValue(cast(string[]) []);
 	}
-	if (!("sourceFolder" in config)) {
+	if (!("sourceFolder" in config.objectNoRef)) {
 		config["sourceFolder"] = JSONValue("source");
 	}
-	if (!("finalFile" in config)) {
+	if (!("finalFile" in config.objectNoRef)) {
 		config["finalFile"]    = config["name"];
 	}
 
