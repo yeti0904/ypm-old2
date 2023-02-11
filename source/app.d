@@ -78,7 +78,6 @@ void main(string[] args) {
 			break;
 		}
 		case "presets": {
-			UpdateConfig();
 			foreach (ref preset ; GetPresets()) {
 				writeln(preset);
 			}
