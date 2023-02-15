@@ -41,6 +41,7 @@ void BuildSystem_Build() {
 		auto status = executeShell(format("cd %s && ypm build", dir));
 
 		if (status.status != 0) {
+			stderr.writefln("Error building dependency %s:", baseName(val.str));
 			stderr.writeln(status.output);
 			exit(1);
 		}
