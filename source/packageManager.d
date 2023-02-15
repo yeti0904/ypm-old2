@@ -240,7 +240,7 @@ void PackageManager_Remove(string toRemove) {
 		stderr.writefln("No such dependency %s", toRemove);
 	}
 
-	auto status = executeShell(format("git rm ./.ypm/%s", baseName(toRemove)));
+	auto status = executeShell(format("git rm ./.ypm/%s -f", baseName(toRemove)));
 
 	if (status.status != 0) {
 		stderr.writefln("Failed to remove git submodule of dependency %s:", toRemove);
