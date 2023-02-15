@@ -130,7 +130,7 @@ void PackageManager_Init(bool presetUsed, string preset) {
 
 	append(
 		".gitignore", format(
-			"%s\n.ypm", config["name"].str
+			"%s\n.ypm/*.hash\n.ypm/*.o", config["name"].str
 		)
 	);
 	
