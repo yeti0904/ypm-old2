@@ -153,7 +153,7 @@ void PackageManager_Add(string url) {
 
 	config["dependencies"] = config["dependencies"].arrayNoRef() ~ JSONValue(url);
 
-	std.file.write("ypm.json", config.toString());
+	std.file.write("ypm.json", config.toPrettyString());
 
 	writefln("Added dependency %s", baseName(url));
 	writeln("Do ypm update to install it");
@@ -229,6 +229,8 @@ void PackageManager_Remove(string toRemove) {
 		if (baseName(element.str) == toRemove) {
 			config["dependencies"] = config["dependencies"].arrayNoRef.remove(i);
 			wasFound               = true;
+
+			std.file.write("ypm.json", config.toPrettyString());
 			
 			break;
 		}
