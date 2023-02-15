@@ -226,7 +226,7 @@ void PackageManager_Remove(string toRemove) {
 	bool wasFound = false;
 
 	foreach (i, ref element ; config["dependencies"].array) {
-		if (element.str)== toRemove) {
+		if (element.str == toRemove) {
 			config["dependencies"] = config["dependencies"].arrayNoRef.remove(i);
 			wasFound               = true;
 
