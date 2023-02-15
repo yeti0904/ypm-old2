@@ -9,15 +9,16 @@ import util;
 const string appHelp = "
 YPM - Package manager and build system
 Options:
-    init    - create project
-    add     - add library
-    update  - update dependencies
-    build   - build project
-    clear   - clear final/source cache
-    setup   - create ypm private folder and install dependencies
-    presets - list project presets
-    install - copy final file to /usr/bin/
-    remove  - remove dependency and its files
+    init         - create project
+    add          - add library
+    update       - update dependencies
+    build        - build project
+    clear        - clear final/source cache
+    setup        - create ypm private folder and install dependencies
+    presets      - list project presets
+    install      - copy final file to /usr/bin/
+    remove       - remove dependency and its files
+    dependencies - show all dependencies
 ";
 
 void main(string[] args) {
@@ -98,6 +99,12 @@ void main(string[] args) {
 			}
 			
 			PackageManager_Remove(args[2]);
+			break;
+		}
+		case "dependencies": {
+			UpdateConfig();
+
+			PackageManager_Dependencies();
 			break;
 		}
 		default: {

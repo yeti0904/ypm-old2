@@ -225,7 +225,7 @@ void PackageManager_Remove(string toRemove) {
 	auto config   = readText("ypm.json").parseJSON();
 	bool wasFound = false;
 
-	foreach (i, ref element ; config.array) {
+	foreach (i, ref element ; config["dependencies"].array) {
 		if (element.str == toRemove) {
 			config["dependencies"] = config["dependencies"].arrayNoRef.remove(i);
 			wasFound               = true;
@@ -246,4 +246,21 @@ void PackageManager_Remove(string toRemove) {
 	}
 
 	writefln("Successfully removed dependency %s", toRemove);
+}
+
+void PackageManager_Dependencies() {
+	CheckIfFolderIsProject();
+
+	auto config = readText("ypm.json").parseJSON();
+
+	string total = format("Total: %d", config["dependencies"].array.length);
+	writeln(total);
+	for (size_t i = 0; i < total.length; ++i) {
+		std.stdio.write('=');
+	}
+	writeln();
+
+	foreach (ref dependency ; config["dependencies"].array) {
+		writeln(dependency.str);
+	}
 }
