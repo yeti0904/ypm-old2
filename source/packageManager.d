@@ -226,7 +226,7 @@ void PackageManager_Remove(string toRemove) {
 	bool wasFound = false;
 
 	foreach (i, ref element ; config["dependencies"].array) {
-		if (element.str == toRemove) {
+		if (baseName(element.str) == toRemove) {
 			config["dependencies"] = config["dependencies"].arrayNoRef.remove(i);
 			wasFound               = true;
 			
@@ -238,11 +238,12 @@ void PackageManager_Remove(string toRemove) {
 		stderr.writefln("No such dependency %s", toRemove);
 	}
 
-	auto status = executeShell(format("git rm ./.ypm/%s", toRemove));
+	auto status = executeShell(format("git rm ./.ypm/%s", baseName(toRemove)));
 
 	if (status.status != 0) {
 		stderr.writefln("Failed to remove git submodule of dependency %s:", toRemove);
 		stderr.writeln(status.output);
+		exit(1);
 	}
 
 	writefln("Successfully removed dependency %s", toRemove);
