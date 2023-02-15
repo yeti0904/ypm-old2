@@ -95,40 +95,25 @@ void BuildSystem_Build() {
 				exit(1);
 			}
 		}
-
-		string    finalFileHashPath = getcwd() ~ "/.ypm/final.hash";
-		ubyte[16] finalFileHash;
-
-		if (exists(finalFileHashPath) && exists(config["finalFile"].str)) {
-			finalFileHash = std.file.read(config["finalFile"].str).md5Of();
-		}
-
-		if (
-			!exists(config["finalFile"].str) ||
-			!exists(finalFileHashPath) ||
-			(std.file.read(finalFileHashPath) == finalFileHash)
-		) {
-
-			string finalCommand =
-				config["final"].str.replace("%B", config["finalFile"].str);
-
-			foreach (ref link ; libs) {
-				finalCommand ~= " -l" ~ link;
-			}
 		
-			writeln("Linking..");
-			//auto status = executeShell(format("cc ./.ypm/*.o -o %s", config["name"].str));
-			auto status = executeShell(finalCommand);
+		string finalCommand =
+			config["final"].str.replace("%B", config["finalFile"].str);
 
-			std.file.write(finalFileHashPath, finalFileHash);
-
-			if (status.status != 0) {
-				stderr.writeln(status.output);
-				stderr.writefln("Failed, exiting now");
-				return;
-			}
+		foreach (ref link ; libs) {
+			finalCommand ~= " -l" ~ link;
 		}
+	
+		writeln("Linking..");
+		//auto status = executeShell(format("cc ./.ypm/*.o -o %s", config["name"].str));
+		auto status = executeShell(finalCommand);
 
+		std.file.write(finalFileHashPath, finalFileHash);
+
+		if (status.status != 0) {
+			stderr.writeln(status.output);
+			stderr.writefln("Failed, exiting now");
+			return;
+		}
 
 		writeln("Done");
 	}
