@@ -1,10 +1,12 @@
 import std.file;
 import std.path;
 import std.json;
+import std.array;
 import std.stdio;
 import std.format;
 import std.string;
 import std.process;
+import std.algorithm;
 import core.stdc.stdlib;
 import util;
 
@@ -215,4 +217,33 @@ void PackageManager_Install() {
 		stderr.writefln("Failed to install: %s", e.msg);
 		exit(1);
 	}
+}
+
+void PackageManager_Remove(string toRemove) {
+	CheckIfFolderIsProject();
+
+	auto config   = readText("ypm.json").parseJSON();
+	bool wasFound = false;
+
+	foreach (i, ref element ; config.array) {
+		if (element.str == toRemove) {
+			config["dependencies"] = config["dependencies"].arrayNoRef.remove(i);
+			wasFound               = true;
+			
+			break;
+		}
+	}
+
+	if (!wasFound) {
+		stderr.writefln("No such dependency %s", toRemove);
+	}
+
+	auto status = executeShell(format("git rm ./.ypm/%s", toRemove));
+
+	if (status.status != 0) {
+		stderr.writefln("Failed to remove git submodule of dependency %s:", toRemove);
+		stderr.writeln(status.output);
+	}
+
+	writefln("Successfully removed dependency %s", toRemove);
 }

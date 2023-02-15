@@ -17,6 +17,7 @@ Options:
     setup   - create ypm private folder and install dependencies
     presets - list project presets
     install - copy final file to /usr/bin/
+    remove  - remove dependency and its files
 ";
 
 void main(string[] args) {
@@ -50,7 +51,7 @@ void main(string[] args) {
 			UpdateConfig();
 			if (args.length < 3) {
 				stderr.writeln("Need 1 extra parameter for add (repo link)");
-					exit(1);
+				exit(1);
 			}
 			PackageManager_Add(args[2]);
 			break;
@@ -86,6 +87,17 @@ void main(string[] args) {
 		case "install": {
 			UpdateConfig();
 			PackageManager_Install();
+			break;
+		}
+		case "remove": {
+			UpdateConfig();
+
+			if (args.length < 3) {
+				stderr.writeln("Need 1 extra parameter for remove (dependency name");
+				exit(1);
+			}
+			
+			PackageManager_Remove(args[2]);
 			break;
 		}
 		default: {
