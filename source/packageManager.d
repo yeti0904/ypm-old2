@@ -14,9 +14,9 @@ static string[string] runPresets;
 void InitPresets() {
 	finalPresets = [
 		"C_program":   "cc .ypm/*.o -o %B",
-		"C_library":   "cc .ypm/*.o -o %B -shared -fPIC",
+		"C_library":   "cc .ypm/*.o -o %B.a",
 		"C++_program": "c++ .ypm/*.o -o %B",
-		"C++_library": "c++ .ypm/*.o -o %B -shared -fPIC",
+		"C++_library": "c++ .ypm/*.o -o %B.a",
 		"header_only": " "
 	];
 	

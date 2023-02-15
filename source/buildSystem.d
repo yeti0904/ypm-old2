@@ -9,6 +9,7 @@ import std.algorithm;
 import std.digest.md;
 import core.stdc.stdlib;
 import util;
+import packageManager;
 
 static string[] ignoreExt = [
 	".h",
@@ -25,9 +26,28 @@ void BuildSystem_Build() {
 
 	string   srcFolder = config["sourceFolder"].str;
 	string[] libs;
+	string[] libIncludes;
 
-	foreach (ref val ; config["link"].arrayNoRef) {
+	foreach (ref val ; config["libs"].arrayNoRef) {
 		libs ~= val.str;
+	}
+
+	foreach (ref val ; config["dependencies"].arrayNoRef) {
+		string dir = "./.ypm/" ~ baseName(val.str);
+		if (!exists(dir)) {
+			PackageManager_Update();
+		}
+
+		auto status = executeShell(format("cd %s && ypm build", dir));
+
+		if (status.status != 0) {
+			stderr.writeln(status.output);
+			exit(1);
+		}
+
+		auto dconfig = readText(dir ~ "/ypm.json").parseJSON();
+
+		
 	}
 
 	writefln("Building project %s", config["name"].str);
@@ -78,7 +98,7 @@ void BuildSystem_Build() {
 		string    finalFileHashPath = getcwd() ~ "/.ypm/final.hash";
 		ubyte[16] finalFileHash;
 
-		if (exists(finalFileHashPath)) {
+		if (exists(finalFileHashPath) && exists(config["finalFile"].str)) {
 			finalFileHash = std.file.read(config["finalFile"].str).md5Of();
 		}
 

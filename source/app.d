@@ -49,7 +49,7 @@ void main(string[] args) {
 		case "add": {
 			UpdateConfig();
 			if (args.length < 3) {
-				stderr.writeln("Need 1 extra parameter for add (repo link");
+				stderr.writeln("Need 1 extra parameter for add (repo link)");
 					exit(1);
 			}
 			PackageManager_Add(args[2]);
