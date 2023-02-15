@@ -95,7 +95,7 @@ void BuildSystem_Build() {
 				exit(1);
 			}
 		}
-		
+	
 		string finalCommand =
 			config["final"].str.replace("%B", config["finalFile"].str);
 
@@ -107,13 +107,12 @@ void BuildSystem_Build() {
 		//auto status = executeShell(format("cc ./.ypm/*.o -o %s", config["name"].str));
 		auto status = executeShell(finalCommand);
 
-		std.file.write(finalFileHashPath, finalFileHash);
-
 		if (status.status != 0) {
 			stderr.writeln(status.output);
 			stderr.writefln("Failed, exiting now");
 			return;
 		}
+
 
 		writeln("Done");
 	}
