@@ -12,23 +12,67 @@ import util;
 
 static string[string] finalPresets;
 static string[string] runPresets;
+static bool[string]   needsLinkPresets;
+static string[string] finalPrefixPresets;
+static string[string] finalSuffixPresets;
 
 void InitPresets() {
 	finalPresets = [
-		"C_program":   "cc .ypm/*.o -o %B",
-		"C_library":   "cc .ypm/*.o -o %B.a",
-		"C++_program": "c++ .ypm/*.o -o %B",
-		"C++_library": "c++ .ypm/*.o -o %B.a",
-		"header_only": " "
+		"C_program":       "cc .ypm/*.o -o %B",
+		"C_library":       "cc .ypm/*.o -o %B",
+		"C++_program":     "c++ .ypm/*.o -o %B",
+		"C++_library":     "c++ .ypm/*.o -o %B",
+		"header_only":     " ",
+		"fortran_program": "gfortran .ypm/*.o -o %B"
 	];
 	
 	runPresets = [
-		"C_program":   "cc %S -c -o %B -I.ypm",
-		"C_library":   "cc %S -c -o %B -I.ypm",
-		"C++_program": "c++ %S -c -o %B -I.ypm",
-		"C++_library": "c++ %s -c -o %B -I.ypm",
-		"header_only": " "
+		"C_program":       "cc %S -c -o %B -I.ypm",
+		"C_library":       "cc %S -c -o %B -I.ypm",
+		"C++_program":     "c++ %S -c -o %B -I.ypm",
+		"C++_library":     "c++ %s -c -o %B -I.ypm",
+		"header_only":     " ",
+		"fortran_program": "gfortran %s -c -o %B -I.ypm"
 	];
+
+	needsLinkPresets = [
+		"C_program":       false,
+		"C_library":       true,
+		"C++_program":     false,
+		"C++_library":     true,
+		"header_only":     false,
+		"fortran_program": false
+	];
+
+	finalPrefixPresets = [
+		"C_program":       "",
+		"C_library":       "lib",
+		"C++_program":     "",
+		"C++_library":     "lib",
+		"header_only":     "",
+		"fortran_program": ""
+	];
+
+	version(Windows) {
+		finalSuffixPresets = [
+			"C_program":       ".exe",
+			"C_library":       ".lib",
+			"C++_program":     ".exe",
+			"C++_library":     ".lib",
+			"header_only":     "",
+			"fortran_program": ".exe"
+		];
+	}
+	else {
+		finalSuffixPresets = [
+			"C_program":       "",
+			"C_library":       ".a",
+			"C++_program":     "",
+			"C++_library":     ".a",
+			"header_only":     "",
+			"fortran_program": ""
+		];
+	}
 }
 
 bool PresetExists(string name) {
@@ -107,14 +151,58 @@ void PackageManager_Init(bool presetUsed, string preset) {
 	if (!("dependencies" in config.objectNoRef)) {
 		config["dependencies"] = JSONValue(cast(string[]) []);
 	}
+	
 	if (!("libs" in config.objectNoRef)) {
 		config["libs"]         = JSONValue(cast(string[]) []);
 	}
+	
 	if (!("sourceFolder" in config.objectNoRef)) {
 		config["sourceFolder"] = JSONValue("source");
 	}
+	
 	if (!("finalFile" in config.objectNoRef)) {
 		config["finalFile"]    = config["name"];
+	}
+
+	if (!("needsLink" in config.objectNoRef)) {
+		if (presetUsed) {
+			config["needsLink"] = JSONValue(needsLinkPresets[preset]);
+		}
+		else {
+			write("Is your program a library, if so does it need to be linked? [Y/N] ");
+			input = readln().strip();
+
+			if ((input == "Y") || (input == "y")) {
+				config["needsLink"] = JSONValue(true);
+			}
+			else {
+				config["needsLink"] = JSONValue(false);
+			}
+		}
+	}
+
+	if (!("finalPrefix" in config.objectNoRef)) {
+		if (presetUsed) {
+			config["finalPrefix"] = finalPrefixPresets[preset];
+		}
+		else {
+			write("What should the prefix of the final file name's prefix be? ");
+			input = readln().strip();
+
+			config["finalPrefix"] = JSONValue(input);
+		}
+	}
+
+	if (!("finalSuffix" in config.objectNoRef)) {
+		if (presetUsed) {
+			config["finalSuffix"] = finalSuffixPresets[preset];
+		}
+		else {
+			write("What should the suffix of the final file name's prefix be? ");
+			input = readln().strip();
+
+			config["finalSuffix"] = JSONValue(input);
+		}
 	}
 
 	if (!exists("source")) {
